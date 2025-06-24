@@ -4,14 +4,231 @@
 
 ## Table of Contents
 
+### 7. historical data 
+- [HistoricalCandle](#historicalcandle)   
+
 ### 8. Pre order Margin Calculation & ScripMaster
 - [MultiOrderMargin](#multiordermargin) 
 - [ScripMaster](#scripmaster) 
   
-  
-### 9. WebSocket 
-- [WebSocket](#websocket)   
-  
+ 
+---
+
+
+# HistoricalCandle
+
+---
+
+## 🔹 API Name
+`GET /V2/historical/{Exch}/{ExchType}/{ScripCode}/{Interval}`
+
+---
+
+## 🎯 Purpose
+
+The **Historical Candles API** provides **OHLCV (Open, High, Low, Close, Volume)** data for a specified instrument over a given time range and interval granularity. It is essential for:
+
+- 🧠 Backtesting trading strategies  
+- 📊 Rendering candlestick charts  
+- 📈 Deploying signal-generating indicators  
+- 🤖 Feeding RAG-enabled trading assistants  
+- 🔍 Analyzing historical price-action behavior  
+
+---
+
+## 🔗 Endpoint Template
+
+```url
+https://openapi.5paisa.com/V2/historical/{Exch}/{ExchType}/{ScripCode}/{Interval}?from={FromDate}&end={EndDate}
+````
+
+**Example:**
+
+```
+https://openapi.5paisa.com/V2/historical/N/C/1660/1d?from=2023-01-01&end=2023-03-01
+```
+
+---
+
+## 📥 Request Overview
+
+### ➕ HTTP Method
+
+`GET`
+
+### ➕ Required Headers
+
+| Header Name                 | Description                                             |
+| --------------------------- | ------------------------------------------------------- |
+| `Authorization`             | Bearer token issued after successful login (JWT format) |
+| `x-clientcode`              | Unique identifier of the logged-in user                 |
+| `Ocp-Apim-Subscription-Key` | Static subscription key provided with API access        |
+
+---
+
+## 🔣 URL Path Parameters
+
+| Parameter   | Type   | Required | Description                                         |
+| ----------- | ------ | -------- | --------------------------------------------------- |
+| `Exch`      | string | ✅ Yes    | Exchange code (e.g., `N`, `B`, `M`, `X`)            |
+| `ExchType`  | string | ✅ Yes    | Segment type (e.g., `C` for cash, `D` for F\&O)     |
+| `ScripCode` | int    | ✅ Yes    | Unique instrument identifier (used to place orders) |
+| `Interval`  | string | ✅ Yes    | Candle interval (`1m`, `5m`, `1d`, etc.)            |
+
+---
+
+## 📅 Query Parameters
+
+| Parameter | Type | Required | Description                       |
+| --------- | ---- | -------- | --------------------------------- |
+| `from`    | date | ✅ Yes    | Start date (format: `YYYY-MM-DD`) |
+| `end`     | date | ✅ Yes    | End date (format: `YYYY-MM-DD`)   |
+
+---
+
+## 🧪 Sample cURL Request
+
+```bash
+curl --location 'https://openapi.5paisa.com/V2/historical/N/C/1660/1d?from=2023-01-01&end=2023-01-10' \
+--header 'Authorization: Bearer <YourAccessToken>' \
+--header 'x-clientcode: <YourClientCode>' \
+--header 'Ocp-Apim-Subscription-Key: <YourSubscriptionKey>'
+```
+
+---
+
+## 📤 Success Response Format
+
+```json
+{
+  "status": "success",
+  "data": {
+    "candles": [
+      [
+        "2023-01-01T00:00:00",
+        292.0,
+        294.0,
+        289.5,
+        293.55,
+        11025420
+      ],
+      [
+        "2023-01-02T00:00:00",
+        295.0,
+        296.3,
+        293.75,
+        295.3,
+        11315876
+      ]
+    ]
+  }
+}
+```
+
+Each array in `candles` represents a single candle for the given interval.
+
+---
+
+## ❌ Failure Response Format
+
+```json
+{
+  "head": {
+    "ResponseCode": "RPOpenAPI",
+    "Status": 1,
+    "Status_description": "Error While Processing"
+  },
+  "body": null
+}
+```
+
+---
+
+## 📘 Field Breakdown
+
+### 🔹 Candle Array Structure
+
+Each element in the `candles` list is an ordered array:
+
+| Index | Field     | Type     | Description                                      |
+| ----- | --------- | -------- | ------------------------------------------------ |
+| \[0]  | Timestamp | datetime | Start time of the candle (`YYYY-MM-DDTHH:MM:SS`) |
+| \[1]  | Open      | float    | Opening price for the candle period              |
+| \[2]  | High      | float    | Highest price during the period                  |
+| \[3]  | Low       | float    | Lowest price during the period                   |
+| \[4]  | Close     | float    | Closing price for the candle period              |
+| \[5]  | Volume    | integer  | Total traded volume during the period            |
+
+---
+
+## ⏱ Supported Intervals
+
+| Code | Description | Typical Use Case                |
+| ---- | ----------- | ------------------------------- |
+| 1m   | 1 Minute    | Scalping, short-term signals    |
+| 5m   | 5 Minutes   | Intraday pattern detection      |
+| 10m  | 10 Minutes  | Low-frequency intraday signals  |
+| 15m  | 15 Minutes  | Swing entries                   |
+| 30m  | 30 Minutes  | Half-hour OHLC confirmation     |
+| 60m  | 1 Hour      | Hourly trend observation        |
+| 1d   | Daily       | Backtesting, EOD strategy logic |
+
+---
+
+## 🏦 Exchange Codes
+
+| Code | Exchange          |
+| ---- | ----------------- |
+| N    | NSE               |
+| B    | BSE               |
+| M    | MCX (Commodities) |
+| X    | NCDEX             |
+
+---
+
+## 🧾 Exchange Segment Codes
+
+| Code | Segment Description               |
+| ---- | --------------------------------- |
+| C    | Cash Segment (Stocks)             |
+| D    | Derivatives (Futures and Options) |
+| U    | Currency Derivatives              |
+| Y    | NSE & BSE Commodities             |
+| X    | NCDEX Commodities                 |
+
+---
+
+## 📎 Notes & Limitations
+
+* ✅ **Max Interval Duration**:
+
+  * 1-minute candles: up to 6 months max
+  * 1-day candles: entire historical range allowed
+
+* ⏳ Timestamps are in **ISO 8601 format**: `YYYY-MM-DDTHH:MM:SS`
+
+* ⚠️ Always validate JWT tokens via the dedicated token validation API before usage
+
+* 🔁 Frequent refresh of recent candles (especially in live trading systems) is recommended
+
+---
+
+## 🧠 Ideal Use Cases
+
+| Scenario                        | Why It's Ideal                             |
+| ------------------------------- | ------------------------------------------ |
+| Backtesting trading strategies  | Provides clean OHLCV for signal simulation |
+| Chart rendering in trading apps | Supplies ready-to-plot candle arrays       |
+| RAG-based AI trading assistants | Used as memory-grounded signal facts       |
+| Automated signal generators     | Serves as the data source for triggers     |
+| Momentum / Volume screening     | Used to compute technical indicators       |
+
+---
+
+## 📦 Tags
+
+`#HistoricalCandles` `#OHLCV` `#AlgoTrading` `#Backtesting` `#5paisaAPI` `#MarketData` 
+
 ---
 
 
@@ -473,376 +690,6 @@ Cache not available for segment 'nse_fo'. Retry after some time.
 * Format is CSV with UTF-8 encoding. Decompress and parse before using.
 * Timestamps are not part of the data; treat this as a static master dump.
 
-
----
-
-# WebSocket 
----
-
-## 🌐 Overview of WebSocket
-
-Whether it's fetching live market data or receiving instant trade confirmations, real-time streaming support greatly enhances the experience for traders and investors.
-
-The 5paisa Xstream WebSocket API allows seamless integration of real-time data feeds into trading applications with minimal latency.
-
-### 🔑 Key Features
-
-* **📈 Live Streaming of Market Data**: Access real-time price movements, quotes, and market depth.
-* **🔔 Order & Trade Confirmations**: Get immediate updates on all order lifecycle events (Place, Modify, Cancel, Trigger).
-* **🔐 Secure & Authenticated Access**: Requires valid `access_token` and `client_code`.
-
----
-
-## ⚙️ How It Works
-
-### 🔗 Step 1: Connect to WebSocket Server
-
-Use the following URL with query parameters:
-
-```
-wss://openfeed.5paisa.com/feeds/api/chat?Value1=<access_token>|<client_code>
-```
-
-* Replace `<access_token>` and `<client_code>` with your credentials (from the access token API).
-
-### 🔔 Step 2: Subscribe to Data Streams
-
-Once connected, the client sends subscription requests to receive specific types of data (market feed, depth, trade confirmations, etc.).
-
-### 🔁 Step 3: Manage Subscriptions
-
-Clients can send `Subscribe` or `Unsubscribe` operations dynamically throughout the session.
-
----
-
-## 💓 Heartbeat Mechanism
-
-* When the **client sends** `PING`, the **server responds** with `PONG`.
-* Ensures the connection remains alive.
-
----
-
-## 🔁 WebSocket Methods
-
-All messages are JSON objects with this structure:
-
-```json
-{
-  "Method": "<method_name>",
-  "Operation": "Subscribe | Unsubscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {
-      "Exch": "N",
-      "ExchType": "C",
-      "ScripCode": 1660
-    }
-  ]
-}
-```
-
----
-##  📋 Supported Methods Overview
-
-|  Method                    | Purpose                                      |
-| ------------------------- | -------------------------------------------- |
-|  `MarketFeedV3`            | Real-time LTP, OHLC, bid/offer details       |
-|  `MarketFeedLite`          | Minimal quote data (LTP, % change, last qty) |
-| `MarketDepthService`      | Order book (bid/ask) depth                   |
-| `GetScripInfoForFuture`   | Open interest & OI high/low for derivatives  |
-|  `OrderTradeConfirmations` | Order lifecycle updates (placed, traded, SL) |
-
----
-
-
-### 📈 Method: `MarketFeedV3`
-
-* **Purpose**: Real-time quotes, LTP, OHLC, bid/ask
-
-#### ✅ Subscribe Request
-
-```json
-{
-  "Method": "MarketFeedV3",
-  "Operation": "Subscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "C", "ScripCode": 1660}
-  ]
-}
-```
-
-#### 🔄 Unsubscribe Request
-
-```json
-{
-  "Method": "MarketFeedV3",
-  "Operation": "Unsubscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "C", "ScripCode": 1660}
-  ]
-}
-```
-
-#### 📤 Response Payload
-
-```json
-{
-  "Exch": "N",
-  "ExchType": "C",
-  "Token": 1660,
-  "LastRate": 440.1,
-  "TotalQty": 1000,
-  "High": 445.5,
-  "Low": 435.1,
-  "OpenRate": 438,
-  "PClose": 440,
-  "AvgRate": 441.2,
-  "Time": 35950,
-  "TickDt": "/Date(1718052145000)/"
-}
-```
-
----
-
-
-### 🔢 Method: `MarketFeedLite`
-
-* **Purpose**: Lightweight version of MarketFeedV3 for minimal bandwidth use
-
-#### ✅ Subscribe Request
-
-```json
-{
-  "Method": "MarketFeedLite",
-  "Operation": "Subscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "C", "ScripCode": 1333},
-    {"Exch": "N", "ExchType": "D", "ScripCode": 148108},
-    {"Exch": "B", "ExchType": "C", "ScripCode": 500112}
-  ]
-}
-```
-
-#### 🔄 Unsubscribe Request
-
-```json
-{
-  "Method": "MarketFeedLite",
-  "Operation": "Unsubscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "C", "ScripCode": 1333}
-  ]
-}
-```
-
-#### 📤 Response Payload
-
-```json
-{
-  "Exch": "N",
-  "ExchType": "C",
-  "Token": 1333,
-  "LastRate": 523.8,
-  "LastQty": 10,
-  "TickDt": "/Date(1718052145000)/",
-  "ChgPcnt": 0.45
-}
-```
-
-### 📊 Method: `MarketDepthService`
-
-* **Purpose**: Order book depth (bid/ask levels)
-
-#### ✅ Subscribe Request
-
-```json
-{
-  "Method": "MarketDepthService",
-  "Operation": "Subscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "C", "ScripCode": 2885}
-  ]
-}
-```
-
-#### 🔄 Unsubscribe Request
-
-```json
-{
-  "Method": "MarketDepthService",
-  "Operation": "Unsubscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "C", "ScripCode": 2885}
-  ]
-}
-```
-
-#### 📤 Response Payload
-
-```json
-{
-  "Exch": "N",
-  "ExchType": "C",
-  "Token": 2885,
-  "TBidQ": 75000,
-  "TOffQ": 82000,
-  "Details": [
-    {"Quantity": 500, "Price": 350.5, "NumberOfOrders": 3, "BbBuySellFlag": 66},
-    {"Quantity": 450, "Price": 350.6, "NumberOfOrders": 2, "BbBuySellFlag": 83}
-  ],
-  "Time": "/Date(1718052145000)/"
-}
-```
-
----
-
-### 📉 Method: `GetScripInfoForFuture`
-
-* **Purpose**: Real-time Open Interest (OI) info
-
-#### ✅ Subscribe Request
-
-```json
-{
-  "Method": "GetScripInfoForFuture",
-  "Operation": "Subscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "D", "ScripCode": 48508}
-  ]
-}
-```
-
-#### 🔄 Unsubscribe Request
-
-```json
-{
-  "Method": "GetScripInfoForFuture",
-  "Operation": "Unsubscribe",
-  "ClientCode": "<client_code>",
-  "MarketFeedData": [
-    {"Exch": "N", "ExchType": "D", "ScripCode": 48508}
-  ]
-}
-```
-
-#### 📤 Response Payload
-
-```json
-{
-  "Exch": "N",
-  "ExchType": "D",
-  "Token": 48508,
-  "OpenInterest": 2388700,
-  "DayHiOI": 2400000,
-  "DayLoOI": 2345100
-}
-```
-
----
-
-### 🔔 Method: `OrderTradeConfirmations`
-
-* **Purpose**: Lifecycle status of orders (place/modify/cancel/trade/SL)
-
-#### ✅ Subscribe Request
-
-```json
-{
-  "Method": "OrderTradeConfirmations",
-  "Operation": "Subscribe",
-  "ClientCode": "<client_code>"
-}
-```
-
-#### 🔄 Unsubscribe Request
-
-```json
-{
-  "Method": "OrderTradeConfirmations",
-  "Operation": "Unsubscribe",
-  "ClientCode": "<client_code>"
-}
-```
-
-#### 📤 Response Payload (Place Order Example)
-
-```json
-{
-  "ReqType": "P",
-  "Status": "Placed",
-  "ScripCode": 1660,
-  "Price": 425,
-  "Qty": 1,
-  "BuySell": "B",
-  "ReqStatus": 0
-}
-```
-
-#### 📤 Response Payload (Trade Example)
-
-```json
-{
-  "ReqType": "T",
-  "Status": "Fully Executed",
-  "TradedQty": 1,
-  "Price": 434.2,
-  "ExchTradeTime": "2024-05-09 11:32:34"
-}
-```
-
----
-
-
-#### ✅ Testing Considerations
-
-* Validate correct fields only (minimal subset)
-* Compare consistency with `MarketFeedV3`
-* Validate against large inputs (up to 3000 scrips)
-* Test concurrent subscriptions for stability
-
----
-
-## 📘 Parameter Summary
-
-### 🔸 Exch (Exchange)
-
-| Code | Description |
-| ---- | ----------- |
-| N    | NSE         |
-| B    | BSE         |
-| M    | MCX         |
-
-### 🔸 ExchType (Segment)
-
-| Code | Description          |
-| ---- | -------------------- |
-| C    | Cash                 |
-| D    | Derivatives (F\&O)   |
-| U    | Currency Derivatives |
-
-
-### 🔸 Operation
-
-| Value       | Description               |
-| ----------- | ------------------------- |
-| Subscribe   | Start receiving live data |
-| Unsubscribe | Stop receiving live data  |
-
----
-
-## 📘 Best Practices
-
-* Subscribe only to required scrips to manage bandwidth and rate limits.
-* Use heartbeat (`PING`/`PONG`) to maintain connection health.
-* Monitor server responses for real-time margin alerts or trade confirmations.
-* Avoid exceeding **3000 subscriptions** per session.
 
 ---
 ---
