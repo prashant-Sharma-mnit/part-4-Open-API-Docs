@@ -62,7 +62,7 @@ https://openapi.5paisa.com/V2/historical/N/C/1660/1d?from=2023-01-01&end=2023-03
 | --------------------------- | ------------------------------------------------------- |
 | `Authorization`             | Bearer token issued after successful login (JWT format) |
 | `x-clientcode`              | Unique identifier of the logged-in user                 |
-| `Ocp-Apim-Subscription-Key` | Static subscription key provided with API access        |
+
 
 ---
 
@@ -92,7 +92,6 @@ https://openapi.5paisa.com/V2/historical/N/C/1660/1d?from=2023-01-01&end=2023-03
 curl --location 'https://openapi.5paisa.com/V2/historical/N/C/1660/1d?from=2023-01-01&end=2023-01-10' \
 --header 'Authorization: Bearer <YourAccessToken>' \
 --header 'x-clientcode: <YourClientCode>' \
---header 'Ocp-Apim-Subscription-Key: <YourSubscriptionKey>'
 ```
 
 ---
@@ -309,7 +308,6 @@ The API returns the margin for both legs together, **factoring in margin benefit
 | --------------------------- | --------------------------------- |
 | `Authorization`             | Bearer token after login (JWT)    |
 | `Content-Type`              | `application/json`                |
-| `x-clientcode`              | Logged-in user's client ID        |
 
 ---
 
@@ -350,25 +348,6 @@ The API returns the margin for both legs together, **factoring in margin benefit
   }
 }
 ```
-
----
-
-## 🧾 Field Descriptions
-
-| Field               | Type    | Description                                               |
-| ------------------- | ------- | --------------------------------------------------------- |
-| `Exch`              | string  | Exchange code (`N`, `B`, `M`, `X`)                        |
-| `ExchType`          | string  | Segment type (`C`=Cash, `D`=F\&O, `U`=Currency)           |
-| `ScripCode`         | int     | Instrument identifier for the trade                       |
-| `ScripData`         | string  | Optional tradable symbol name (if ScripCode is not given) |
-| `PlaceModifyCancel` | string  | "P" = place, "M" = modify, "C" = cancel                   |
-| `OrderType`         | string  | "B" = Buy, "S" = Sell                                     |
-| `Price`             | float   | Limit price (set to 0 for market orders)                  |
-| `Qty`               | int     | Quantity of shares/contracts                              |
-| `IsIntraday`        | boolean | `true` for intraday, `false` for delivery                 |
-| `CoverPositions`    | string  | "Y" to include existing holdings, "N" to ignore them      |
-
----
 
 ## 🧪 Sample cURL Request
 
@@ -420,6 +399,27 @@ curl --location 'https://openapi.5paisa.com/VendorsAPI/Service1.svc/MultiOrderMa
 ```
 
 ---
+
+---
+
+## 🧾 Field Descriptions
+
+| Field               | Type    | Description                                               |
+| ------------------- | ------- | --------------------------------------------------------- |
+| `Exch`              | string  | Exchange code (`N`, `B`, `M`, `X`)                        |
+| `ExchType`          | string  | Segment type (`C`=Cash, `D`=F\&O, `U`=Currency)           |
+| `ScripCode`         | int     | Instrument identifier for the trade                       |
+| `ScripData`         | string  | Optional tradable symbol name (if ScripCode is not given) |
+| `PlaceModifyCancel` | string  | "P" = place, "M" = modify, "C" = cancel                   |
+| `OrderType`         | string  | "B" = Buy, "S" = Sell                                     |
+| `Price`             | float   | Limit price (set to 0 for market orders)                  |
+| `Qty`               | int     | Quantity of shares/contracts                              |
+| `IsIntraday`        | boolean | `true` for intraday, `false` for delivery                 |
+| `CoverPositions`    | string  | "Y" to include existing holdings, "N" to ignore them      |
+
+---
+
+
 
 ## ✅ Success Response
 
@@ -511,12 +511,6 @@ curl --location 'https://openapi.5paisa.com/VendorsAPI/Service1.svc/MultiOrderMa
 
 ---
 
-## 📦 Tags
-
-`#MultiOrderMargin` `#5paisaAPI` `#RiskEngine` `#BasketTrading` `#MarginEstimation` `#AlgoTrading` `#OptionsMargin` `#Hedging`
-
----
-
 # ScripMaster
 
 ---
@@ -549,7 +543,6 @@ GET https://openapi.5paisa.com/VendorsAPI/Service1.svc/ScripMaster/segment/{segm
 ````
 
 ---
-
 ## 🧾 Segment Options
 
 The `{segment}` path parameter determines which scrip category to fetch:
@@ -573,7 +566,12 @@ The `{segment}` path parameter determines which scrip category to fetch:
 
 ---
 
-## 🧪 Sample cURL Requests
+## 🧪 ScripMaster cURL Requests
+
+```bash
+curl --location 'https://Openapi.5paisa.com/VendorsAPI/Service1.svc/ScripMaster/segment/all' \
+--header 'Content-Type: application/json'
+````
 
 ```bash
 # NSE Equity
@@ -588,6 +586,10 @@ curl --location 'https://Openapi.5paisa.com/VendorsAPI/Service1.svc/ScripMaster/
 ```
 
 ---
+
+
+
+
 
 ## ✅ Success Response
 
